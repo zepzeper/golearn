@@ -15,3 +15,7 @@ func NewLinkChecker(url string, status int, isDead bool, RefferelURL string) *li
         RefferelURL: RefferelURL,
     } 
 }
+
+func (l *linkChecker) IsDead() bool  {
+   return l.isDead 
+}
