@@ -12,7 +12,6 @@ func ExtractLinks(n *html.Node, baseURL *url.URL) []string {
 }
 
 func ExtractLinksRecursive(n *html.Node, baseURL *url.URL, links *[]string) {
-
     if n.Type == html.ElementNode && n.Data == "a" {
         // Anchor tag found
         for _, attr := range n.Attr {
