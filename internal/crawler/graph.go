@@ -97,6 +97,7 @@ func (g *Graph) IsSameDomain(link string) bool {
 }
 
 func (g *Graph) PrintStats() {
+    log.Printf("\n\n -------------- Results -------------- ")
     log.Printf("Crawling completed using %s algorithm", g.Algorithm)
     log.Printf("Total URLs discovered: %d", g.NodesCount)
 

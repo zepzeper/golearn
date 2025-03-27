@@ -26,9 +26,7 @@ func (d *DFSCrawler) Crawl(graph *crawler.Graph, crawler *crawler.PageCrawler, s
             log.Fatalf("Failed to parse base URL: %v", err)
         }
 
-
         if node, exists := graph.GetNode(currentURL); exists && node.Visited { continue; }
-
 
         if err != nil {
             log.Printf("Error crawling %s: %v", currentURL, err)

@@ -16,10 +16,9 @@ func main() {
 
     baseURL := flag.String("url", "https://scrape-me.dreamsofcode.io/", "The base URL to start crawling from")
     algorithm := flag.String("algo", "bfs", "Crawling algorithm to use: 'bfs' or 'dfs'")
-    maxDepth := flag.Int("depth", 10, "Maximum crawling depth")
-    timeout := flag.Int("timeout", 10, "HTTP request timeout in seconds")
+    maxDepth := flag.Int("depth", -1, "Maximum crawling depth")
+    timeout := flag.Int("timeout", 0, "HTTP request timeout in seconds")
     flag.Parse()
-
 
     log.Printf("Starting web crawler with %s algorithm on %s", *algorithm, *baseURL)
 
