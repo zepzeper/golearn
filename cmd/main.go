@@ -1,13 +1,12 @@
 package main
 
 import (
+	"flag"
 	"log"
 	"net/http"
-	"net/url"
 	"os"
-	"scrape/internal/checker"
+	"scrape/internal/algorithms"
 	"scrape/internal/crawler"
-	"scrape/internal/utils"
 	"time"
 )
 
@@ -15,42 +14,51 @@ func main() {
     log.SetOutput(os.Stdout)
     log.SetPrefix("[web-crawler] ")
 
-    urlManager := utils.NewURLManager()
+    baseURL := flag.String("url", "https://scrape-me.dreamsofcode.io/", "The base URL to start crawling from")
+    algorithm := flag.String("algo", "bfs", "Crawling algorithm to use: 'bfs' or 'dfs'")
+    maxDepth := flag.Int("depth", 10, "Maximum crawling depth")
+    timeout := flag.Int("timeout", 10, "HTTP request timeout in seconds")
+    flag.Parse()
+
+
+    log.Printf("Starting web crawler with %s algorithm on %s", *algorithm, *baseURL)
 
     client := &http.Client{
-        Timeout: 10 * time.Second,
+        Timeout: time.Duration(*timeout) * time.Second,
     }
 
     pageCrawler := crawler.NewPageCrawler(client)
 
-    links, err := pageCrawler.Crawl(urlManager.BaseURL);
-
+    graph, err := crawler.NewGraph(*baseURL, *algorithm, *maxDepth)
     if err != nil {
-        log.Fatalf("Failed to parse base URL: %v", err)
+        log.Fatalf("Failed to initialize web graph: %v", err)
     }
 
+    // Base node
+    graph.AddNode(*baseURL)
 
-    for _, link := range links {
+    algo := GetAlgo(*algorithm)
 
-        if urlManager.IsVisited(link) {
-            continue;
-        }
-
-        urlManager.MarkVisited(link)
-
-        _, _ = url.Parse(link);
-        
-        status := pageCrawler.CheckLink(link);
-
-        isDead := status < 200 || status > 400
-        _ = checker.NewLinkChecker(link, status, isDead, urlManager.BaseURL)
-
-        if isDead {
-            log.Printf("DEAD LINK: %s (Status: %d)", link, status)
-        } else {
-            log.Printf("VALID LINK: %s (Status: %d)", link, status)
-        }
+    startTime := time.Now()
+    err = algo.Crawl(graph, pageCrawler, *baseURL)
+    if err != nil {
+        log.Fatalf("Crawling failed: %v", err)
     }
 
-	log.Printf("Crawling completed. Visited %d URLs.", len(urlManager.GetVisited()))
+    // Print statistics
+    duration := time.Since(startTime)
+    log.Printf("Crawling took %s", duration)
+    graph.PrintStats()
 }
+
+
+func GetAlgo(name string) algorithms.CrawlAlgorithm {
+	switch name {
+      case "dfs":
+        return &algorithms.DFSCrawler{}
+      default:
+        // Default to BFS
+        return &algorithms.DFSCrawler{}
+	}
+}
+
